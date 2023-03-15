@@ -7,12 +7,28 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 abstract class BaseViewModel<UiState: IUiState, UiIntent: IUiIntent> : ViewModel() {
+
     private val _uiStateFlow = MutableStateFlow(initUiState())
     val uiStateFlow: StateFlow<UiState> = _uiStateFlow
+
     protected abstract fun initUiState(): UiState
 
+    protected fun sendUiState(copy: UiState.() -> UiState) {
+        _uiStateFlow.update {
+            copy(_uiStateFlow.value)
+        }
+    }
+
     private val _uiIntentFlow: Channel<UiIntent> = Channel()
-    private val uiIntentFlow: Flow<UiIntent> = _uiIntentFlow.receiveAsFlow()
+    val uiIntentFlow: Flow<UiIntent> = _uiIntentFlow.receiveAsFlow()
+
+    private val _loadUiIntentFlow: Channel<LoadUiIntent> = Channel()
+    val loadUiIntentFlow : Flow<LoadUiIntent> = _loadUiIntentFlow.receiveAsFlow()
+    fun sendUiIntent(uiIntent: UiIntent) {
+        viewModelScope.launch {
+            _uiIntentFlow.send(uiIntent)
+        }
+    }
 
     init {
         viewModelScope.launch {
@@ -24,15 +40,12 @@ abstract class BaseViewModel<UiState: IUiState, UiIntent: IUiIntent> : ViewModel
 
     protected abstract fun handleIntent(intent: IUiIntent)
 
-    fun sendUiIntent(uiIntent: UiIntent) {
+    /**
+     * 发送当前加载状态：Loading,Error,Normal
+     */
+    private fun sendLoadUiIntent(loadUiIntent: LoadUiIntent) {
         viewModelScope.launch {
-            _uiIntentFlow.send(uiIntent)
-        }
-    }
-
-    protected fun sendUiState(copy: UiState.() -> UiState) {
-        _uiStateFlow.update {
-            copy(_uiStateFlow.value)
+            _loadUiIntentFlow.send(loadUiIntent)
         }
     }
 
@@ -41,16 +54,21 @@ abstract class BaseViewModel<UiState: IUiState, UiIntent: IUiIntent> : ViewModel
         request: suspend () -> BaseData<T>,
         successCallback: (T) -> Unit,
         failCallback: suspend (String) -> Unit = { errMsg ->
-            //默认异常处理
+            //默认异常处理，子类可以进行覆写
+            sendLoadUiIntent(LoadUiIntent.Error(errMsg))
         }
     ) {
         viewModelScope.launch {
+            //是否展示Loading
+            if (showLoading) {
+                sendLoadUiIntent(LoadUiIntent.Loading(true))
+            }
             val baseData: BaseData<T>
             try {
                 baseData = request()
                 when (baseData.state) {
                     ReqState.Success -> {
-                        sendLoadUiState(LoadUiState.showMainView)
+                        sendLoadUiIntent(LoadUiIntent.ShowMainView)
                         baseData.data?.let {
                             successCallback(it)
                         }
@@ -65,6 +83,10 @@ abstract class BaseViewModel<UiState: IUiState, UiIntent: IUiIntent> : ViewModel
                     e.message ?.let {
                         failCallback(it)
                     }
+            } finally {
+                if (showLoading) {
+                    sendLoadUiIntent(LoadUiIntent.Loading(false))
+                }
             }
         }
     }

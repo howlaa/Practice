@@ -1,3 +1,8 @@
 <resources>
     <string name="app_name">MyPractice</string>
+    <string name="home">Home</string>
+    <string name="blog">Blog</string>
+    <string name="search">Search</string>
+    <string name="project_type">ProjectType</string>
+    <string name="navigation_me">Me</string>
 </resources>

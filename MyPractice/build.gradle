@@ -3,18 +3,4 @@ plugins {
     id 'com.android.application' version '7.4.1' apply false
     id 'com.android.library' version '7.4.1' apply false
     id 'org.jetbrains.kotlin.android' version '1.8.0' apply false
-    id 'org.jetbrains.kotlin.jvm' version '1.8.0' apply false
-}
-ext {
-    androidxAnnotationVersion = "1.5.0"
-    robolectricVersion = "4.9"
-    guavaVersion = "31.1-android"
-    extTruthVersion = "1.5.0"
-    coreVersion = "1.5.0"
-    extJUnitVersion = "1.1.5"
-    runnerVersion = "1.5.2"
-    espressoVersion = "3.5.1"
-    lifecycleVersion = '2.5.1'
-    fragmentVersion = '1.1.0-alpha09'
-    coroutinesVersion = "1.3.0-M2"
 }

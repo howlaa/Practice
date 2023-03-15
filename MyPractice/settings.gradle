@@ -14,4 +14,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = "MyPractice"
 include ':app'
-include ':build-logic'
+//include ':build-logic'

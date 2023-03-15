@@ -10,6 +10,7 @@ import androidx.test.filters.LargeTest
 import org.junit.Rule
 import org.junit.runner.RunWith
 import androidx.test.ext.junit.rules.activityScenarioRule
+import com.example.mypractice.ui.main.MainActivity
 import org.junit.Before
 import org.junit.Test
 

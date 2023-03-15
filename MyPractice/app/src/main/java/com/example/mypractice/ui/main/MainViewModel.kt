@@ -2,8 +2,9 @@ package com.example.mypractice.ui.main
 
 import com.example.mypractice.base.BaseViewModel
 import com.example.mypractice.base.IUiIntent
+import com.example.mypractice.model.repository.HomeRepository
 
-class MainViewModel : BaseViewModel<MainState, MainIntent>() {
+class MainViewModel(private val homeRepo: HomeRepository) : BaseViewModel<MainState, MainIntent>() {
 
     override fun initUiState(): MainState {
         return MainState(BannerUiState.INIT, DetailUiState.INIT)
@@ -14,7 +15,7 @@ class MainViewModel : BaseViewModel<MainState, MainIntent>() {
             MainIntent.GetBanner -> {
                 requestDataWithFlow(
                     showLoading = true,
-                    request = {mWanRepo.requestWanData()},
+                    request = {homeRepo.requestWanData()},
                     successCallback = { data -> sendUiState { copy(bannerUiState = BannerUiState.SUCCESS(data)) }},
                     failCallback = {}
                 )
@@ -22,7 +23,7 @@ class MainViewModel : BaseViewModel<MainState, MainIntent>() {
             is MainIntent.GetDetail -> {
                 requestDataWithFlow(
                     showLoading = false,
-                    request = { mWanRepo.requestRankData(intent.page)},
+                    request = { homeRepo.requestRankData(intent.page)},
                     successCallback = { data -> sendUiState { copy(detailUiState = DetailUiState.SUCCESS(data)) }}
                 )
             }
